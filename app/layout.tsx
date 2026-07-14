@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SerwistProvider } from "@serwist/next/react";
+import SerwistGuard from "./serwist-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,9 +55,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SerwistProvider swUrl="/sw.js">
-          {children}
-        </SerwistProvider>
+        <SerwistGuard>{children}</SerwistGuard>
       </body>
     </html>
   );
