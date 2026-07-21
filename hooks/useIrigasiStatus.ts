@@ -8,7 +8,7 @@ export interface IrigasiStatus {
   kelembapan: number;
   pompa_aktif: boolean;
   prediksi_hujan: boolean;
-  soil_raw: number;
+  soil_state: number;
   suhu: number;
   tanah_kering: boolean;
   tekanan_udara: number;

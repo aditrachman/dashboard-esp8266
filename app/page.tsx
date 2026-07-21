@@ -33,6 +33,11 @@ function ConnectionBadge({
 
   return (
     <div className="flex items-center gap-2 rounded-full border border-zinc-700/50 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-400">
+      {status === "online" && (
+        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-400 animate-live-pulse">
+          ⚡ Live
+        </span>
+      )}
       <span className={`inline-block h-2 w-2 rounded-full ${dot}`} />
       {label}
     </div>
@@ -45,12 +50,14 @@ function StatCard({
   unit,
   accent,
   icon,
+  flashKey,
 }: {
   label: string;
   value: string | number;
   unit?: string;
   accent: "green" | "teal" | "orange" | "red" | "blue" | "purple";
   icon: string;
+  flashKey?: number;
 }) {
   const accentColors = {
     green: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
@@ -70,7 +77,7 @@ function StatCard({
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-3xl font-bold tracking-tight text-white">{value}</span>
+        <span key={flashKey} className="text-3xl font-bold tracking-tight text-white animate-data-flash">{value}</span>
         {unit && <span className="text-sm text-zinc-500">{unit}</span>}
       </div>
     </div>
@@ -149,7 +156,7 @@ function ConfigErrorState({ message }: { message: string }) {
   );
 }
 
-function DashboardContent({ data }: { data: IrigasiStatus }) {
+function DashboardContent({ data, lastUpdated, connectionStatus }: { data: IrigasiStatus; lastUpdated: Date | null; connectionStatus: ConnectionStatus }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
@@ -162,7 +169,7 @@ function DashboardContent({ data }: { data: IrigasiStatus }) {
             Monitoring realtime sistem irigasi otomatis
           </p>
         </div>
-        <ConnectionBadge status="online" />
+        <ConnectionBadge status={connectionStatus} />
       </div>
 
       {/* Grid kartu */}
@@ -218,6 +225,7 @@ function DashboardContent({ data }: { data: IrigasiStatus }) {
           unit="°C"
           accent="orange"
           icon="🌡️"
+          flashKey={data.timestamp}
         />
         <StatCard
           label="Kelembapan Udara"
@@ -225,6 +233,7 @@ function DashboardContent({ data }: { data: IrigasiStatus }) {
           unit="%"
           accent="blue"
           icon="💧"
+          flashKey={data.timestamp}
         />
         <StatCard
           label="Tekanan Udara"
@@ -232,15 +241,17 @@ function DashboardContent({ data }: { data: IrigasiStatus }) {
           unit="hPa"
           accent="purple"
           icon="🌪️"
+          flashKey={data.timestamp}
         />
 
         {/* Baris 3: Soil Raw */}
         <StatCard
           label="Soil Raw"
-          value={data.soil_raw}
+          value={data.soil_state}
           unit="/ 1023"
           accent="teal"
           icon="🌱"
+          flashKey={data.timestamp}
         />
       </div>
 
@@ -248,7 +259,7 @@ function DashboardContent({ data }: { data: IrigasiStatus }) {
       <div className="mt-6 flex flex-col gap-1 text-xs text-zinc-600">
         <p>
           Last updated:{" "}
-          <span className="text-zinc-400">{formatTime(new Date())}</span>{" "}
+          <span className="text-zinc-400">{formatTime(lastUpdated)}</span>{" "}
           <span className="text-zinc-700">(client time)</span>
         </p>
         <p>
@@ -279,11 +290,13 @@ export default function Home() {
     return (
       <div className="flex min-h-dvh flex-col bg-background font-sans">
         <DashboardContent
+          lastUpdated={lastUpdated}
+          connectionStatus={connectionStatus}
           data={{
             kelembapan: 0,
             pompa_aktif: false,
             prediksi_hujan: false,
-            soil_raw: 0,
+            soil_state: 0,
             suhu: 0,
             tanah_kering: false,
             tekanan_udara: 0,
@@ -338,7 +351,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background font-sans">
-      <DashboardContent data={data} />
+      <DashboardContent data={data} lastUpdated={lastUpdated} connectionStatus={connectionStatus} />
     </div>
   );
 }
